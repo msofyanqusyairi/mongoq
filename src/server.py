@@ -15,12 +15,12 @@ import bottle
 from bottle import post, request, run
 import json
 
-from mongoq.datacache import CacheController
+from cachequeue.datacache import CacheController
 
 # init cache
 processId = "process-1"
-delayReceive = 0.01
-delaySend = 0.01
+delayReceive = 5
+delaySend = 5
 cacheController = CacheController(processId, delayReceive, delaySend)
 
 # start thread
@@ -37,8 +37,12 @@ def caching():
     data = request.body.read()
     dataContent = json.loads(data)
     newData = dataContent['content']
+    url = dataContent['url']
+    timeout = dataContent['timeout']
     fixContent = {
-        'content' :  newData
+        'content' :  newData,
+        'url' : url,
+        'timeout' : timeout
     }
     
     cacheController.getThreadReceive().appendData(fixContent)

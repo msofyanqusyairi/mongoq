@@ -12,7 +12,7 @@
 
 from datetime import datetime
 import pymongo
-from mongoq import DATA_CACHE_COLLECTION
+from cachequeue import DATA_CACHE_COLLECTION
 
 
 

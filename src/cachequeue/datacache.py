@@ -11,6 +11,7 @@
 # #############################################################################
 
 import threading
+import requests
 import json
 from mongoq import MongoQueue
 import time
@@ -104,17 +105,74 @@ class ThreadSend(threading.Thread):
     def __nextCursor(self):
         # set fetch status to False,
         # it means another process has get the data
-        self.__dataCache.next()
-        self.__fetchStatus = False
+        if self.__fetchStatus:
+            self.__dataCache.next()
+            self.__fetchStatus = False
 
     # send data cache to another process
-    def throw(self, func, param):
+    def __throw(self, func, param):
         # flag is output (True or False)
         # if True, it means another process has get the data.
         # and below to inform ThreadSend (Ack to ThreadSend)
+        print "Entry throw function"
         flag = func(*param)
         if flag:
             self.__fetchStatus = True
+            self.__nextCursor()
+
+    # You can make diffrent action by edit this block
+    def __sendAction(self, payload, url, timeout, url_proxy=None):
+        #  header of http
+        _headers = {
+            'Content-type' : 'application/json',
+            'Accept' : 'text/plain'
+        }
+
+        # request body
+        _content = {
+            'payload' : payload
+        }
+
+        # set url, and timeout
+        _url = url
+        _timeout = timeout
+
+        print "send to {0} with timeout={1}".format(_url, _timeout)
+        
+        # prepare proxy config
+        # if no proxy will be {}
+        _proxies = {}
+        if url_proxy is not None:
+            _proxies = {
+                'http' : url_proxy,
+                'https' : url_proxy
+            }
+
+        print "sending data ..."
+
+        # send data to url
+        response = requests.post(
+            _url,
+            data = json.dumps(_content),
+            headers = _headers,
+            timeout = _timeout,
+            proxies = _proxies
+        )
+
+        statusCode = response.status_code
+        body = response.text
+        print "########################################################################"
+        print "response status: {0}".format(statusCode)
+        print "response body: {0}".format(body)
+        print "########################################################################"
+
+        # return (statusCode, body)
+        if statusCode == 200:
+            return True
+        else:
+            return False
+
+    #
 
     # override threading
     def run(self):
@@ -125,10 +183,12 @@ class ThreadSend(threading.Thread):
                 # fetch data
                 dataReady = self.__fetchData()['data_cache']
                 content = dataReady['content']
-                if dataReady and self.__fetchStatus:
+                url = dataReady['url']
+                timeout = dataReady['timeout']
+                if dataReady:
                     # next cursor in queue 
                     # if data ready is not none, and another process accept to get data
-                    self.__nextCursor()
+                    self.__throw(self.__sendAction, (content, url, timeout))
                         
 
             # except
