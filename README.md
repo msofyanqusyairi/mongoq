@@ -1,4 +1,4 @@
-# mongoq
+# MongoQ
 
 ## Description
 * Simplicity to use mongodb with FIFO mechanism (Queue)
@@ -12,12 +12,12 @@
 ## DATA SENDER
 * Data is sent using HTTP protocol (can be adjusted)
 * Header: {'Content-type': 'application/json', 'Accept': 'text/plain'} --> (can be adjusted)
-* payload : {'content': '<data>', 'url':'http://<host-server>', 'timeout':<timeout>}
+* payload : {'content': '[data]', 'url':'http://[host-server]', 'timeout':[timeout]}
 
 ## DATA RECEIVER
-* The receiver will receive data {'payload': {'content': <data>}}
+* The receiver will receive data {'payload': {'content': [data]}}
 
 ## DATA CACHE in MongoQ
 * This module provides 2 thread.
-    ** Thread Receive : Receive data from sender, then insert to mongodb
-    ** Thread Send : find and delete data from mongodb, check and send data to another server/process
+    * Thread Receive : Receive data from sender, then insert to mongodb
+    *Thread Send : find and delete data from mongodb, check and send data to another server/process
