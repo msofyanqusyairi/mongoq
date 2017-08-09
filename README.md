@@ -20,4 +20,4 @@
 ## DATA CACHE in MongoQ
 * This module provides 2 thread.
     * Thread Receive : Receive data from sender, then insert to mongodb
-    *Thread Send : find and delete data from mongodb, check and send data to another server/process
+    * Thread Send : find and delete data from mongodb, check and send data to another server/process
